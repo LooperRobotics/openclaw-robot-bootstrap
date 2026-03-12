@@ -1,0 +1,22 @@
+{
+  "TCP": {
+    "8443": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "${TS_CERT_DOMAIN}:8443": {
+      "Handlers": {
+        "/feishu/events": {
+          "Proxy": "http://127.0.0.1:3000/feishu/events"
+        },
+        "/": {
+          "Proxy": "http://127.0.0.1:18789"
+        }
+      }
+    }
+  },
+  "AllowFunnel": {
+    "${TS_CERT_DOMAIN}:8443": true
+  }
+}

@@ -1,0 +1,34 @@
+# OpenClaw local state (contains credentials, sessions, config)
+openclaw-state/
+
+# Environment variables (use .env.example as template)
+.env
+.env.local
+.env.*.local
+
+# Docker volumes and build artifacts
+docker-compose.extra.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node (if developing locally)
+node_modules/
+.pnpm-debug.log
+pnpm-lock.yaml
+
+# Logs
+*.log
+logs/
+/tmp/
+
+# Misc
+.cache/
