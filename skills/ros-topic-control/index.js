@@ -18,6 +18,7 @@ class ROSTopicControl {
 
   /**
    * Build docker exec command with ROS environment setup
+   * Note: Agent developers control the ROS commands; validate input at agent level
    */
   _buildDockerCmd(rosCmd) {
     const rosEnv = `ROS_DOMAIN_ID=${this.domainId} ROS_LOCALHOST_ONLY=0`;
