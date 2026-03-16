@@ -1,11 +1,12 @@
 /**
  * Example: Basic Robot Movement Controller
- * Demonstrates ROS topic publishing from an OpenClaw agent
+ * Demonstrates ROS topic publishing from an OpenClaw agent via docker exec
  */
 
 const ROSTopicControl = require('./index');
 
 const ros = new ROSTopicControl({
+  containerName: 'ros-humble-core',
   domainId: process.env.ROS_DOMAIN_ID || '0',
   timeout: 5000
 });

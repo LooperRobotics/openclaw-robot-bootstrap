@@ -1,6 +1,7 @@
 /**
  * ROS Topic Control Helper
  * Simplifies ROS 2 topic publishing and service calls from OpenClaw agents
+ * Uses docker exec to communicate with ros-humble sidecar container
  */
 
 const { exec } = require('child_process');
@@ -10,13 +11,30 @@ const execAsync = promisify(exec);
 
 class ROSTopicControl {
   constructor(options = {}) {
+    this.containerName = options.containerName || 'ros-humble-core';
     this.domainId = options.domainId || process.env.ROS_DOMAIN_ID || '0';
     this.timeout = options.timeout || 5000;
-    this.env = {
-      ...process.env,
-      ROS_DOMAIN_ID: this.domainId,
-      ROS_LOCALHOST_ONLY: '0'
-    };
+  }
+
+  /**
+   * Build docker exec command with ROS environment setup
+   */
+  _buildDockerCmd(rosCmd) {
+    const rosEnv = `ROS_DOMAIN_ID=${this.domainId} ROS_LOCALHOST_ONLY=0`;
+    return `docker exec -e ${rosEnv} ${this.containerName} bash -c "source /opt/ros/humble/setup.bash && ${rosCmd}"`;
+  }
+
+  /**
+   * Execute command in ROS container
+   */
+  async _execInROS(rosCmd) {
+    const cmd = this._buildDockerCmd(rosCmd);
+    try {
+      const { stdout } = await execAsync(cmd, { timeout: this.timeout });
+      return { success: true, stdout: stdout.trim() };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   }
 
   /**
@@ -27,15 +45,11 @@ class ROSTopicControl {
    */
   async publishTopic(topic, msgType, data) {
     const cmd = `ros2 topic pub --once ${topic} ${msgType} '${data}'`;
-    try {
-      const { stdout } = await execAsync(cmd, {
-        env: this.env,
-        timeout: this.timeout
-      });
-      return { success: true, message: stdout.trim() };
-    } catch (error) {
-      return { success: false, error: error.message };
+    const result = await this._execInROS(cmd);
+    if (result.success) {
+      return { success: true, message: result.stdout };
     }
+    return { success: false, error: result.error };
   }
 
   /**
@@ -44,15 +58,11 @@ class ROSTopicControl {
    */
   async subscribeTopic(topic) {
     const cmd = `ros2 topic echo ${topic} --once`;
-    try {
-      const { stdout } = await execAsync(cmd, {
-        env: this.env,
-        timeout: this.timeout
-      });
-      return { success: true, data: stdout.trim() };
-    } catch (error) {
-      return { success: false, error: error.message };
+    const result = await this._execInROS(cmd);
+    if (result.success) {
+      return { success: true, data: result.stdout };
     }
+    return { success: false, error: result.error };
   }
 
   /**
@@ -63,15 +73,11 @@ class ROSTopicControl {
    */
   async callService(service, srvType, args = '') {
     const cmd = `ros2 service call ${service} ${srvType} ${args}`;
-    try {
-      const { stdout } = await execAsync(cmd, {
-        env: this.env,
-        timeout: this.timeout
-      });
-      return { success: true, response: stdout.trim() };
-    } catch (error) {
-      return { success: false, error: error.message };
+    const result = await this._execInROS(cmd);
+    if (result.success) {
+      return { success: true, response: result.stdout };
     }
+    return { success: false, error: result.error };
   }
 
   /**
@@ -79,15 +85,12 @@ class ROSTopicControl {
    */
   async listTopics() {
     const cmd = 'ros2 topic list';
-    try {
-      const { stdout } = await execAsync(cmd, {
-        env: this.env,
-        timeout: this.timeout
-      });
-      return { success: true, topics: stdout.trim().split('\n') };
-    } catch (error) {
-      return { success: false, error: error.message };
+    const result = await this._execInROS(cmd);
+    if (result.success) {
+      const topics = result.stdout.split('\n').filter(t => t.length > 0);
+      return { success: true, topics };
     }
+    return { success: false, error: result.error };
   }
 
   /**
@@ -95,15 +98,12 @@ class ROSTopicControl {
    */
   async listServices() {
     const cmd = 'ros2 service list';
-    try {
-      const { stdout } = await execAsync(cmd, {
-        env: this.env,
-        timeout: this.timeout
-      });
-      return { success: true, services: stdout.trim().split('\n') };
-    } catch (error) {
-      return { success: false, error: error.message };
+    const result = await this._execInROS(cmd);
+    if (result.success) {
+      const services = result.stdout.split('\n').filter(s => s.length > 0);
+      return { success: true, services };
     }
+    return { success: false, error: result.error };
   }
 
   /**
@@ -111,16 +111,14 @@ class ROSTopicControl {
    */
   async getTopicInfo(topic) {
     const cmd = `ros2 topic info ${topic}`;
-    try {
-      const { stdout } = await execAsync(cmd, {
-        env: this.env,
-        timeout: this.timeout
-      });
-      return { success: true, info: stdout.trim() };
-    } catch (error) {
-      return { success: false, error: error.message };
+    const result = await this._execInROS(cmd);
+    if (result.success) {
+      return { success: true, info: result.stdout };
     }
+    return { success: false, error: result.error };
   }
 }
+
+module.exports = ROSTopicControl;
 
 module.exports = ROSTopicControl;
