@@ -3,9 +3,7 @@ services:
     image: ros:humble-ros-core
     container_name: ros-humble-core
     restart: unless-stopped
-    network_mode: service:tailscale
-    depends_on:
-      - tailscale
+    network_mode: host
     environment:
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
       ROS_LOCALHOST_ONLY: "0"
