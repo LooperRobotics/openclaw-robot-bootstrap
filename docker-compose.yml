@@ -1,4 +1,16 @@
 services:
+  ros-humble:
+    image: ros:humble-ros-core
+    container_name: ros-humble-core
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      ROS_LOCALHOST_ONLY: "0"
+    volumes:
+      - ros-state:/root/.ros
+    command: ["bash", "-c", "source /opt/ros/humble/setup.bash && ros2 daemon stop; sleep infinity"]
+
   tailscale:
     image: tailscale/tailscale:latest
     container_name: openclaw-tailscale
@@ -47,3 +59,4 @@ services:
 
 volumes:
   tailscale-state:
+  ros-state:

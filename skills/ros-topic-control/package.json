@@ -1,0 +1,27 @@
+{
+  "name": "ROS Topic Control",
+  "version": "1.0.0",
+  "description": "OpenClaw skill for controlling ROS 2 topics and services from agents",
+  "main": "index.js",
+  "scripts": {
+    "test": "node -e \"console.log('Unit tests not yet implemented')\"",
+    "example": "node examples.js"
+  },
+  "keywords": [
+    "ros",
+    "robot",
+    "openclaw",
+    "control",
+    "topic",
+    "service"
+  ],
+  "author": "LooperRobotics",
+  "license": "MIT",
+  "dependencies": {},
+  "optionalDependencies": {
+    "ros2-js": "latest"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

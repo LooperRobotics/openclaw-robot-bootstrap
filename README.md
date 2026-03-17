@@ -1,6 +1,11 @@
-# OpenClaw Docker Image
+# OpenClaw Robot Control Stack
 
-Runs OpenClaw Gateway behind a Tailscale sidecar. Tailscale Funnel exposes the gateway over HTTPS on port 8443, accessible from anywhere in your tailnet (or publicly via Funnel).
+OpenClaw Gateway with ROS Humble integration for robot control. Runs OpenClaw Gateway behind a Tailscale sidecar with ROS Humble core as a message broker sidecar. Enables remote robot control via OpenClaw agents with native ROS topic/service communication.
+
+**Stack Components:**
+- **OpenClaw Gateway:** Agent runtime and API server
+- **Tailscale Sidecar:** Secure network access (HTTPS on port 8443)
+- **ROS Humble Sidecar:** ROS topic/service bridge for robot communication
 
 ## Quick start
 
@@ -63,3 +68,20 @@ docker compose up -d
 ## Data persistence
 
 `${OPENCLAW_STATE_PATH}` (default `./openclaw-state`) is mounted to `/root/.openclaw` in the container. Config, credentials, sessions, and workspace data survive restarts here.
+
+## ROS Integration
+
+The `ros-humble` sidecar runs ROS Humble core and bridges OpenClaw agent commands to robot middleware.
+
+- **ROS Distribution:** Humble (Ubuntu 22.04 compatible)
+- **Network:** Shared network via Tailscale (localhost communication)
+- **Usage:** Agents can publish/subscribe to ROS topics or call services
+
+Example agent interaction:
+
+```javascript
+// Inside OpenClaw agent
+const ros_bridge = exec('ros2 topic pub /robot_cmd std_msgs/String "data: move_forward"');
+```
+
+Configure ROS_DOMAIN_ID and robot parameters in `.env`.
