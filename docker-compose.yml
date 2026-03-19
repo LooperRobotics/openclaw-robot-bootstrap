@@ -32,7 +32,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        OPENCLAW_VERSION: ${OPENCLAW_VERSION:-latest}
+        OPENCLAW_VERSION: ${OPENCLAW_VERSION:-main}
     container_name: openclaw-gateway
     restart: unless-stopped
     network_mode: service:tailscale
@@ -40,16 +40,17 @@ services:
     depends_on:
       - tailscale
     environment:
-      OPENCLAW_HOME: /root
-      OPENCLAW_STATE_DIR: /root/.openclaw
-      OPENCLAW_CONFIG_PATH: /root/.openclaw/openclaw.json
+      OPENCLAW_HOME: /home/node
+      OPENCLAW_STATE_DIR: /home/node/.openclaw
+      OPENCLAW_CONFIG_PATH: /home/node/.openclaw/openclaw.json
       OPENCLAW_LOG_LEVEL: ${OPENCLAW_LOG_LEVEL:-info}
       OPENCLAW_GATEWAY_PASSWORD: ${OPENCLAW_GATEWAY_PASSWORD}
-      CLAWHUB_WORKDIR: /root/.openclaw/workspace
+      CLAWHUB_WORKDIR: /home/node/.openclaw/workspace
+    group_add:
+      - "${DOCKER_SOCK_GID:-999}"
     volumes:
-      - ${OPENCLAW_STATE_PATH:-./openclaw-state}:/root/.openclaw
+      - ${OPENCLAW_STATE_PATH:-./openclaw-state}:/home/node/.openclaw
       - /var/run/docker.sock:/var/run/docker.sock
-    command: ["openclaw", "gateway", "--port", "18789", "--allow-unconfigured"]
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:18789/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
