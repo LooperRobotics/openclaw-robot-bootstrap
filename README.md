@@ -22,7 +22,7 @@ docker compose up -d --build
 | `TS_AUTHKEY` | Yes (first start) | Tailscale auth key from [admin/settings/keys](https://login.tailscale.com/admin/settings/keys) |
 | `OPENCLAW_GATEWAY_PASSWORD` | Yes | Password for gateway access |
 | `TS_HOSTNAME` | No | Tailnet node hostname (default: `openclaw-gateway`) |
-| `OPENCLAW_VERSION` | No | Pin to a release tag, e.g. `2026.2.26` (default: `latest`) |
+| `OPENCLAW_VERSION` | No | Image tag (default: `main`). Available: `main`, `main-slim`, `main-amd64`, `main-slim-amd64`, etc. |
 | `OPENCLAW_STATE_PATH` | No | Host path for persistent state (default: `./openclaw-state`) |
 | `OPENCLAW_LOG_LEVEL` | No | `trace`/`debug`/`info`/`warn`/`error` (default: `info`) |
 
@@ -46,16 +46,10 @@ docker compose exec openclaw-gateway openclaw status
 
 ## Upgrading
 
-```bash
-docker compose pull
-docker compose build --pull --no-cache
-docker compose up -d
-```
-
-To pin a version, set in `.env`:
+To upgrade to a newer image, update `OPENCLAW_VERSION` in `.env`:
 
 ```
-OPENCLAW_VERSION=2026.2.26
+OPENCLAW_VERSION=main-slim-amd64
 ```
 
 Then rebuild:
@@ -67,7 +61,7 @@ docker compose up -d
 
 ## Data persistence
 
-`${OPENCLAW_STATE_PATH}` (default `./openclaw-state`) is mounted to `/root/.openclaw` in the container. Config, credentials, sessions, and workspace data survive restarts here.
+`${OPENCLAW_STATE_PATH}` (default `./openclaw-state`) is mounted to `/home/node/.openclaw` in the container. Config, credentials, sessions, and workspace data survive restarts here.
 
 ## ROS Integration
 
@@ -84,4 +78,4 @@ Example agent interaction:
 const ros_bridge = exec('ros2 topic pub /robot_cmd std_msgs/String "data: move_forward"');
 ```
 
-Configure ROS_DOMAIN_ID and robot parameters in `.env`.
+Configure `ROS_DOMAIN_ID` and robot parameters in `.env`.
